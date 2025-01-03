@@ -1,0 +1,38 @@
+{
+  "extends": [
+    "eslint:recommended", // Basic ESLint rules
+    "plugin:@typescript-eslint/recommended", // TypeScript rules if using TypeScript
+    "plugin:node/recommended", // Node.js specific rules
+    "prettier" // Integrates with Prettier for consistent formatting
+  ],
+  "plugins": ["@typescript-eslint", "node"],
+  "parser": "@typescript-eslint/parser", // Parses TypeScript if applicable
+  "parserOptions": {
+    "ecmaVersion": 2021, // Allows modern ECMAScript features
+    "sourceType": "module", // Supports import/export statements
+    "project": "./tsconfig.json" // Ensures compatibility with TypeScript
+  },
+  "env": {
+    "node": true, // Node.js global variables
+    "es2021": true // Modern ECMAScript globals
+  },
+  "rules": {
+    "no-console": "warn", // Warns on console.log use
+    "no-process-exit": "error", // Avoids using process.exit() in Node services
+    "node/no-unpublished-import": "off", // Allows devDependencies in import for types/testing
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      { "argsIgnorePattern": "^_" }
+    ], // Ignores unused variables prefixed with "_"
+    "@typescript-eslint/explicit-module-boundary-types": "off", // Turns off explicit return types for flexibility
+    "prefer-const": "error" // Enforces const over let when variables aren’t reassigned
+  },
+  "overrides": [
+    {
+      "files": ["*.test.ts"], // Specific rules for test files
+      "env": {
+        "jest": true // Allows Jest global variables
+      }
+    }
+  ]
+}

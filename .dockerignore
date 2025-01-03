@@ -1,0 +1,39 @@
+Dockerfile
+.dockerignore
+.gitignore
+README.md
+
+# Build artifacts
+dist
+build
+node_modules
+npm-debug.log
+
+# Logs
+logs
+*.log
+*.log.*
+
+# Local environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Miscellaneous
+*.swp
+*.temp
+*.tmp
+*~
+*.bak
+*.backup
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Version control system files
+.git
+.gitignore
+.gitattributes

@@ -1,0 +1,8 @@
+# Enforce LF for Docker-specific files
+Dockerfile text eol=lf
+*.sh text eol=lf
+
+# Use CRLF for other code files
+*.js text eol=crlf
+*.ts text eol=crlf
+*.mjs text eol=crlf

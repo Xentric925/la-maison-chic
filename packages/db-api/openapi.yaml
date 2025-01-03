@@ -1,0 +1,2149 @@
+components:
+  securitySchemes:
+    cookieAuth:
+      in: cookie
+      name: session
+      type: apiKey
+info:
+  description:
+    'The HR DB API is a RESTful API that provides access to the HR database.
+
+
+    API possible responses: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#client_error_responses
+
+
+    Informational responses (100 - 199)
+
+
+    Successful responses (200 - 299)
+
+
+    Redirection messages (300 - 399)
+
+
+    Client error responses (400 - 499)
+
+
+    Server error responses (500 - 599)
+
+    '
+  title: HR DB API,
+  version: apiVersion,
+openapi: 3.1.0
+paths:
+  /login:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                email:
+                  example: user@example.com
+                  format: email
+                  type: string
+              type: object
+        description: The email address of the user requesting a login token
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Login token generated and email job created successfully
+                    type: string
+                type: object
+          description: Login token generated and email job created successfully
+      security: []
+      summary: Generate a login token for a user
+      tags:
+        - Authentication
+  /logout:
+    post:
+      requestBody:
+        content: {}
+        description: No request body required.
+        required: false
+      responses:
+        '200':
+          description: Successfully logged out.
+      summary: User logout
+      tags:
+        - Authentication
+  /validate-token:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                email:
+                  example: user@example.com
+                  format: email
+                  type: string
+                loginToken:
+                  example: 4c2fdef7-9d3b-4c2d-a1b6-9c2bfc51900b
+                  type: string
+              type: object
+        description: The email address and login token to validate
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Login token is valid
+                    type: string
+                type: object
+          description: Login token is valid
+      security: []
+      summary: Validate a login token
+      tags:
+        - Authentication
+  /company-settings:
+    delete:
+      parameters:
+        - description: ID of the company settings
+          in: path
+          name: companySettingsId
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Company settings deleted successfully
+                    type: string
+                type: object
+          description: Company settings deleted successfully
+      summary: Delete company settings by ID
+      tags:
+        - Company Settings
+    get:
+      parameters:
+        - description: The ID of the company whose settings are to be retrieved
+          in: query
+          name: companyId
+          required: true
+          schema:
+            example: 101
+            type: integer
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                items:
+                  properties:
+                    companyId:
+                      example: 101
+                      type: integer
+                    id:
+                      example: 1
+                      type: integer
+                    logoUrl:
+                      example: https://example.com/logo.png
+                      type: string
+                  type: object
+                type: array
+          description: A list of company settings for the specified company
+      summary: Retrieve company settings for a specific company
+      tags:
+        - Company Settings
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                companyId:
+                  example: 101
+                  type: integer
+                companyName:
+                  example: Acme Corp
+                  type: string
+                logoUrl:
+                  example: https://example.com/logo.png
+                  type: string
+              type: object
+        required: true
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    example: 1
+                    type: integer
+                  message:
+                    example: Company settings created successfully
+                    type: string
+                type: object
+          description: Company settings created successfully
+      summary: Create new company settings
+      tags:
+        - Company Settings
+    put:
+      parameters:
+        - description: ID of the company settings
+          in: path
+          name: companySettingsId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                companyName:
+                  example: Updated Corp
+                  type: string
+                logoUrl:
+                  example: https://example.com/new-logo.png
+                  type: string
+              type: object
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Company settings updated successfully
+                    type: string
+                type: object
+          description: Company settings updated successfully
+      summary: Update company settings by ID
+      tags:
+        - Company Settings
+  /dayoffs:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                items:
+                  properties:
+                    fromDate:
+                      example: '2024-12-24T00:00:00Z'
+                      format: date-time
+                      type: string
+                    id:
+                      example: 1
+                      type: integer
+                    name:
+                      example: Christmas Holiday
+                      type: string
+                    toDate:
+                      example: '2024-12-25T23:59:59Z'
+                      format: date-time
+                      type: string
+                  type: object
+                type: array
+          description: A list of day-offs
+      summary: Retrieve all day-offs
+      tags:
+        - DayOffs
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                fromDate:
+                  example: '2024-12-24T00:00:00Z'
+                  format: date-time
+                  type: string
+                name:
+                  example: Christmas Holiday
+                  type: string
+                toDate:
+                  example: '2024-12-25T23:59:59Z'
+                  format: date-time
+                  type: string
+              type: object
+        required: true
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    example: 1
+                    type: integer
+                  message:
+                    example: Day-off created successfully
+                    type: string
+                type: object
+          description: Day-off created successfully
+      summary: Create a new day-off
+      tags:
+        - DayOffs
+  /dayoffs/count:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  count:
+                    example: 5
+                    type: integer
+                type: object
+          description: The count of future day-offs
+      summary: Count all future day-offs
+      tags:
+        - DayOffs
+  /dayoffs/{dayoffId}:
+    delete:
+      parameters:
+        - description: ID of the day-off to delete
+          in: path
+          name: dayoffId
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Day-off deleted successfully
+                    type: string
+                type: object
+          description: Day-off deleted successfully
+      summary: Delete a day-off by ID
+      tags:
+        - DayOffs
+    put:
+      parameters:
+        - description: ID of the day-off to update
+          in: path
+          name: dayoffId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                fromDate:
+                  example: '2024-12-23T00:00:00Z'
+                  format: date-time
+                  type: string
+                name:
+                  example: Updated Holiday
+                  type: string
+                toDate:
+                  example: '2024-12-24T23:59:59Z'
+                  format: date-time
+                  type: string
+              type: object
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Day-off updated successfully
+                    type: string
+                type: object
+          description: Day-off updated successfully
+      summary: Update a day-off by ID
+      tags:
+        - DayOffs
+  /departments:
+    get:
+      parameters:
+        - description: Page number
+          in: query
+          name: page
+          required: false
+          schema:
+            example: 1
+            type: integer
+        - description: Number of items per page
+          in: query
+          name: limit
+          required: false
+          schema:
+            example: 10
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    items:
+                      type: object
+                    type: array
+                  limit:
+                    type: integer
+                  page:
+                    type: integer
+                  total:
+                    type: integer
+                type: object
+          description: Paginated departments
+      summary: Retrieve paginated departments
+      tags:
+        - Departments
+  /departments/count:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  count:
+                    example: 10
+                    type: integer
+                type: object
+          description: Total count of departments
+      summary: Retrieve the total count of departments
+      tags:
+        - Departments
+  /departments/{id}:
+    delete:
+      parameters:
+        - description: The ID of the department to delete
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Department 1 deleted successfully
+                    type: string
+                type: object
+          description: Department deleted successfully
+      summary: Delete a department by ID
+      tags:
+        - Departments
+    get:
+      parameters:
+        - description: The ID of the department to retrieve
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    example: 1
+                    type: integer
+                  description:
+                    example: Handles all HR-related activities.
+                    type: string
+                  name:
+                    example: HR Department
+                    type: string
+                  location:
+                    properties:
+                      id:
+                        example: 1
+                        type: integer
+                      name:
+                        example: New York Office
+                        type: string
+                    type: object
+                  createdAt:
+                    example: '2024-01-01T10:00:00Z'
+                    format: date-time
+                    type: string
+                type: object
+          description: Department retrieved successfully
+        404:
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Department 1 not found
+                    type: string
+                type: object
+          description: Department not found
+      summary: Retrieve a specific department by ID
+      tags:
+        - Departments
+    put:
+      parameters:
+        - description: The ID of the department to update
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                description:
+                  example: Handles all HR-related activities.
+                  type: string
+                name:
+                  example: HR Department
+                  type: string
+                location:
+                  properties:
+                    id:
+                      example: 1
+                      type: integer
+                    name:
+                      example: New York Office
+                      type: string
+                  type: object
+              type: object
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Department 1 updated successfully
+                    type: string
+                type: object
+          description: Department updated successfully
+      summary: Update a department by ID
+      tags:
+        - Departments
+  /feature-flags:
+    delete:
+      parameters:
+        - description: ID of the feature flag to delete
+          in: path
+          name: featureFlagId
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Feature flag deleted successfully
+                    type: string
+                type: object
+          description: Feature flag deleted successfully
+      summary: Delete a feature flag by ID
+      tags:
+        - Feature Flags
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                items:
+                  properties:
+                    createdAt:
+                      example: '2024-01-01T10:00:00Z'
+                      format: date-time
+                      type: string
+                    description:
+                      example: Toggles dark mode for the platform
+                      type: string
+                    id:
+                      example: 1
+                      type: integer
+                    isActive:
+                      example: true
+                      type: boolean
+                    name:
+                      example: EnableDarkMode
+                      type: string
+                    updatedAt:
+                      example: '2024-01-02T12:00:00Z'
+                      format: date-time
+                      type: string
+                  type: object
+                type: array
+          description: List of feature flags retrieved successfully
+      summary: Retrieve all feature flags
+      tags:
+        - Feature Flags
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                description:
+                  example: Toggles dark mode for the platform
+                  type: string
+                isActive:
+                  example: true
+                  type: boolean
+                name:
+                  example: EnableDarkMode
+                  type: string
+              type: object
+        required: true
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    example: 1
+                    type: integer
+                  message:
+                    example: Feature flag created successfully
+                    type: string
+                type: object
+          description: Feature flag created successfully
+      summary: Create a new feature flag
+      tags:
+        - Feature Flags
+    put:
+      parameters:
+        - description: ID of the feature flag to update
+          in: path
+          name: featureFlagId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                description:
+                  example: Toggles dark mode for the platform
+                  type: string
+                isActive:
+                  example: true
+                  type: boolean
+                name:
+                  example: EnableDarkMode
+                  type: string
+              type: object
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Feature flag updated successfully
+                    type: string
+                type: object
+          description: Feature flag updated successfully
+      summary: Update a feature flag by ID
+      tags:
+        - Feature Flags
+  /groups:
+    get:
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            description: 'Page number for pagination (default: 0)
+
+              '
+            type: integer
+        - in: query
+          name: limit
+          required: false
+          schema:
+            description: 'Number of items per page (default: 10)
+
+              '
+            type: integer
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    items:
+                      properties:
+                        description:
+                          example: Group focused on development tasks.
+                          type: string
+                        id:
+                          example: 1
+                          type: integer
+                        name:
+                          example: Development Group
+                          type: string
+                      type: object
+                    type: array
+                  next:
+                    example: true
+                    type: boolean
+                type: object
+          description: A list of groups
+      summary: Retrieve all groups
+      tags:
+        - Groups
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                description:
+                  example: Group focused on development tasks.
+                  type: string
+                name:
+                  example: Development Group
+                  type: string
+                location:
+                  properties:
+                    id:
+                      example: 1
+                      type: integer
+                    name:
+                      example: New York Office
+                      type: string
+                  type: object
+              type: object
+        required: true
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Group 1 created successfully
+                    type: string
+                type: object
+          description: Group created successfully
+      summary: Create a new group
+      tags:
+        - Groups
+  /groups/count:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  count:
+                    example: 25
+                    type: integer
+                type: object
+          description: Total count of groups
+      summary: Retrieve the total count of groups
+      tags:
+        - Groups
+  /groups/{id}:
+    delete:
+      parameters:
+        - description: The ID of the group to delete
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Group 1 deleted successfully
+                    type: string
+                type: object
+          description: Group deleted successfully
+      summary: Delete a group by ID
+      tags:
+        - Groups
+    get:
+      parameters:
+        - description: The ID of the group
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  description:
+                    example: Group focused on development tasks.
+                    type: string
+                  groupUsers:
+                    items:
+                      properties:
+                        user:
+                          properties:
+                            email:
+                              example: john.doe@example.com
+                              type: string
+                            firstName:
+                              example: John
+                              type: string
+                            lastName:
+                              example: Doe
+                              type: string
+                          type: object
+                        userId:
+                          example: 101
+                          type: integer
+                      type: object
+                    type: array
+                  id:
+                    example: 1
+                    type: integer
+                  name:
+                    example: Development Group
+                    type: string
+                type: object
+          description: Group retrieved successfully
+        404:
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Group 1 not found
+                    type: string
+                type: object
+          description: Group not found
+      summary: Retrieve a specific group by ID
+      tags:
+        - Groups
+    put:
+      parameters:
+        - description: The ID of the group to update
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                description:
+                  example: Group focused on development tasks.
+                  type: string
+                name:
+                  example: Development Group
+                  type: string
+                location:
+                  properties:
+                    id:
+                      example: 1
+                      type: integer
+                    name:
+                      example: New York Office
+                      type: string
+                  type: object
+              type: object
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Group 1 updated successfully
+                    type: string
+                type: object
+          description: Group updated successfully
+      summary: Update a group by ID
+      tags:
+        - Groups
+  /groups/{id}/members:
+    delete:
+      parameters:
+        - description: The ID of the group
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - description: The ID of the member to remove
+          in: path
+          name: memberId
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Member 101 removed from Group 1
+                    type: string
+                type: object
+          description: Member removed successfully
+      summary: Remove a member from a group
+      tags:
+        - Groups
+    post:
+      parameters:
+        - description: The ID of the group
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                memberId:
+                  example: 101
+                  type: integer
+              type: object
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Member 101 added to Group 1
+                    type: string
+                type: object
+          description: Member added successfully
+      summary: Add a member to a group
+      tags:
+        - Groups
+  /hello:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Hello, World!
+                    type: string
+                type: object
+          description: Successful response
+      security: []
+      summary: A simple hello world endpoint
+      tags:
+        - Hello
+  /locations:
+    get:
+      parameters:
+        - description: 'Number of items per page
+
+            '
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 10
+            type: integer
+        - description: 'Page number
+
+            '
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 0
+            type: integer
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                items:
+                  properties:
+                    address:
+                      example: 5th Street - Building 100, first floor
+                      type: string
+                    city:
+                      example: New York
+                      type: string
+                    country:
+                      example: US
+                      type: string
+                    id:
+                      example: 1
+                      type: integer
+                    name:
+                      example: New York Office
+                      type: string
+                  type: object
+                type: array
+          description: A list of locations
+      summary: Get all locations
+      tags:
+        - Locations
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                address:
+                  example: 5th Street - Building 100, first floor
+                  type: string
+                city:
+                  example: New York
+                  type: string
+                country:
+                  example: US
+                  type: string
+                name:
+                  example: New York Office
+                  type: string
+                workSettingId:
+                  example: 2
+                  type: integer
+              type: object
+        required: true
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    example: 1
+                    type: integer
+                type: object
+          description: Location created successfully
+      summary: Create a new location
+      tags:
+        - Locations
+  /locations/count:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  count:
+                    example: 10
+                    type: integer
+                type: object
+          description: The count of departments
+      summary: Retrieves the count of locations
+      tags:
+        - Locations
+  /locations/{locationId}:
+    delete:
+      parameters:
+        - description: The ID of the location
+          in: path
+          name: locationId
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    example: Location deleted successfully
+                    type: string
+                type: object
+          description: Location deleted successfully
+      summary: Delete a location by ID
+      tags:
+        - Locations
+    get:
+      parameters:
+        - description: The ID of the location
+          in: path
+          name: locationId
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  address:
+                    example: 5th Street - Building 100, first floor
+                    type: string
+                  city:
+                    example: New York
+                    type: string
+                  country:
+                    example: US
+                    type: string
+                  departments:
+                    items:
+                      type: object
+                    type: array
+                  groups:
+                    items:
+                      type: object
+                    type: array
+                  id:
+                    example: 1
+                    type: integer
+                  name:
+                    example: New York Office
+                    type: string
+                  teams:
+                    items:
+                      type: object
+                    type: array
+                  users:
+                    items:
+                      type: object
+                    type: array
+                  workSetting:
+                    type: object
+                type: object
+          description: A location
+      summary: Retrieve a specific location by ID
+      tags:
+        - Locations
+    put:
+      parameters:
+        - description: The ID of the location
+          in: path
+          name: locationId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                address:
+                  example: 5th Street - Building 100, first floor
+                  type: string
+                city:
+                  example: New York
+                  type: string
+                country:
+                  example: US
+                  type: string
+                name:
+                  example: New York Office
+                  type: string
+                workSettingId:
+                  example: 2
+                  type: integer
+              type: object
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    example: Location updated successfully
+                    type: string
+                type: object
+          description: Location updated successfully
+      summary: Update a location by ID
+      tags:
+        - Locations
+  /logs/general:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                items:
+                  properties:
+                    action:
+                      example: User Login
+                      type: string
+                    createdAt:
+                      example: '2024-01-01T10:00:00Z'
+                      format: date-time
+                      type: string
+                    details:
+                      additionalProperties: true
+                      example:
+                        ip: 192.168.1.1
+                      type: object
+                    entity:
+                      example: User
+                      type: string
+                    entityId:
+                      example: 101
+                      type: integer
+                    id:
+                      example: 1
+                      type: integer
+                  type: object
+                type: array
+          description: General logs retrieved successfully
+      summary: Retrieve general logs
+      tags:
+        - Logs
+  /logs/user-history:
+    get:
+      parameters:
+        - description: ID of the user whose history to retrieve
+          in: query
+          name: userId
+          required: false
+          schema:
+            type: integer
+        - description:
+            'Start date of the range to filter logs (default: 3 months ago)
+
+            '
+          in: query
+          name: startDate
+          required: false
+          schema:
+            format: date
+            type: string
+        - description:
+            'End date of the range to filter logs (default: current date)
+
+            '
+          in: query
+          name: endDate
+          required: false
+          schema:
+            format: date
+            type: string
+        - description: Type of user action to filter (e.g., LOGIN, LOGOUT, etc.)
+          in: query
+          name: action
+          required: false
+          schema:
+            enum:
+              - LOGIN
+              - LOGOUT
+              - TITLE_UPDATE
+              - ROLE_UPDATE
+              - TEAM_MEMBER_ADDED
+              - TEAM_MEMBER_REMOVED
+              - GROUP_MEMBER_ADDED
+              - GROUP_MEMBER_REMOVED
+            type: string
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                items:
+                  properties:
+                    action:
+                      example: LOGIN
+                      type: string
+                    createdAt:
+                      example: '2024-01-01T10:00:00Z'
+                      format: date-time
+                      type: string
+                    currentData:
+                      additionalProperties: true
+                      example: {}
+                      type: object
+                    id:
+                      example: 1
+                      type: integer
+                    previousData:
+                      additionalProperties: true
+                      example: {}
+                      type: object
+                    updateDescription:
+                      example: User logged in successfully
+                      type: string
+                    userId:
+                      example: 101
+                      type: integer
+                  type: object
+                type: array
+          description: User history retrieved successfully
+        400:
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Invalid date range or action type
+                    type: string
+                type: object
+          description: Invalid request parameters
+        404:
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: No user history found
+                    type: string
+                type: object
+          description: No logs found for the given user and filters
+        500:
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Internal server error
+                    type: string
+                type: object
+          description: Internal server error
+      summary: Retrieve user-specific logs
+      tags:
+        - Logs
+  /teams:
+    get:
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            description: 'Page number for pagination (default: 0)
+
+              '
+            type: integer
+        - in: query
+          name: limit
+          required: false
+          schema:
+            description: 'Number of items per page (default: 10)
+
+              '
+            type: integer
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    items:
+                      properties:
+                        description:
+                          example: Team focused on development tasks.
+                          type: string
+                        id:
+                          example: 1
+                          type: integer
+                        name:
+                          example: Development Team
+                          type: string
+                      type: object
+                    type: array
+                  next:
+                    example: true
+                    type: boolean
+                type: object
+          description: A list of teams
+      summary: Retrieve all teams
+      tags:
+        - Teams
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                description:
+                  example: Team focused on development tasks.
+                  type: string
+                name:
+                  example: Development Team
+                  type: string
+                location:
+                  properties:
+                    id:
+                      example: 1
+                      type: integer
+                    name:
+                      example: New York Office
+                      type: string
+                  type: object
+              type: object
+        required: true
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Team 1 created successfully
+                    type: string
+                type: object
+          description: Team created successfully
+      summary: Create a new team
+      tags:
+        - Teams
+  /teams/count:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  count:
+                    example: 25
+                    type: integer
+                type: object
+          description: Total count of teams
+      summary: Retrieve the total count of teams
+      tags:
+        - Teams
+  /teams/{id}:
+    delete:
+      parameters:
+        - description: The ID of the team to delete
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Team 1 deleted successfully
+                    type: string
+                type: object
+          description: Team deleted successfully
+      summary: Delete a team by ID
+      tags:
+        - Teams
+    get:
+      parameters:
+        - description: The ID of the team
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  description:
+                    example: Team focused on development tasks.
+                    type: string
+                  id:
+                    example: 1
+                    type: integer
+                  name:
+                    example: Development Team
+                    type: string
+                  teamUsers:
+                    items:
+                      properties:
+                        user:
+                          properties:
+                            email:
+                              example: john.doe@example.com
+                              type: string
+                            firstName:
+                              example: John
+                              type: string
+                            lastName:
+                              example: Doe
+                              type: string
+                          type: object
+                        userId:
+                          example: 101
+                          type: integer
+                      type: object
+                    type: array
+                type: object
+          description: Team retrieved successfully
+        404:
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Team 1 not found
+                    type: string
+                type: object
+          description: Team not found
+      summary: Retrieve a specific team by ID
+      tags:
+        - Teams
+    put:
+      parameters:
+        - description: The ID of the team to update
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                description:
+                  example: Team focused on development tasks.
+                  type: string
+                name:
+                  example: Development Team
+                  type: string
+                location:
+                  properties:
+                    id:
+                      example: 1
+                      type: integer
+                    name:
+                      example: New York Office
+                      type: string
+                  type: object
+              type: object
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Team 1 updated successfully
+                    type: string
+                type: object
+          description: Team updated successfully
+      summary: Update a team by ID
+      tags:
+        - Teams
+  /teams/{id}/members:
+    delete:
+      parameters:
+        - description: The ID of the team
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - description: The ID of the member to remove
+          in: path
+          name: memberId
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Member 101 removed from Team 1
+                    type: string
+                type: object
+          description: Member removed successfully
+      summary: Remove a member from a team
+      tags:
+        - Teams
+    post:
+      parameters:
+        - description: The ID of the team
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                memberId:
+                  example: 101
+                  type: integer
+              type: object
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Member 101 added to Team 1
+                    type: string
+                type: object
+          description: Member added successfully
+      summary: Add a member to a team
+      tags:
+        - Teams
+  /users:
+    get:
+      parameters:
+        - description: The page number (0-indexed)
+          in: query
+          name: page
+          required: false
+          schema:
+            example: 0
+            type: integer
+        - description: The number of users per page
+          in: query
+          name: limit
+          required: false
+          schema:
+            example: 10
+            type: integer
+        - description: Filter users by department ID
+          in: query
+          name: department
+          required: false
+          schema:
+            example: 1
+            type: integer
+        - description: Filter users by team ID
+          in: query
+          name: team
+          required: false
+          schema:
+            example: 1
+            type: integer
+        - description: Filter users by group ID
+          in: query
+          name: group
+          required: false
+          schema:
+            example: 1
+            type: integer
+        - description: Filter users by location ID
+          in: query
+          name: location
+          required: false
+          schema:
+            example: 1
+            type: integer
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    items:
+                      properties:
+                        email:
+                          example: john.doe@example.com
+                          type: string
+                        firstName:
+                          example: John
+                          type: string
+                        id:
+                          example: 1
+                          type: integer
+                        lastName:
+                          example: Doe
+                          type: string
+                        role:
+                          example: EMPLOYEE
+                          type: string
+                      type: object
+                    type: array
+                  next:
+                    example: true
+                    type: boolean
+                type: object
+          description: A paginated list of users
+      summary: Retrieve a paginated list of all users
+      tags:
+        - Users
+    post:
+      description: 'Creates a new user. Admin-only access.
+
+        '
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                email:
+                  format: email
+                  type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                locationId:
+                  type: integer
+                reportsToId:
+                  nullable: true
+                  type: integer
+                role:
+                  type: string
+                workSettingId:
+                  nullable: true
+                  type: integer
+              required:
+                - email
+                - firstName
+                - lastName
+                - role
+                - locationId
+              type: object
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                properties:
+                  deletedAt:
+                    format: date-time
+                    nullable: true
+                    type: string
+                  email:
+                    format: email
+                    type: string
+                  firstName:
+                    type: string
+                  id:
+                    type: integer
+                  lastName:
+                    type: string
+                  locationId:
+                    type: integer
+                  reportsToId:
+                    nullable: true
+                    type: integer
+                  role:
+                    type: string
+                  workSettingId:
+                    nullable: true
+                    type: integer
+                type: object
+          description: User created successfully
+        '400':
+          description: Invalid input
+        '500':
+          description: Server error
+      summary: Create a new user
+      tags:
+        - Users
+  /users/count:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  count:
+                    example: 50
+                    type: integer
+                type: object
+          description: Total count of users
+      summary: Retrieve the total count of users
+      tags:
+        - Users
+  /users/me:
+    get:
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  email:
+                    example: john.doe@example.com
+                    type: string
+                  firstName:
+                    example: John
+                    type: string
+                  id:
+                    example: 1
+                    type: integer
+                  lastName:
+                    example: Doe
+                    type: string
+                  profile:
+                    properties:
+                      additionalInfo:
+                        example: Additional information about the user
+                        type: string
+                      profileImage:
+                        example: https://example.com/image.jpg
+                        type: string
+                      title:
+                        example: Software Engineer
+                        type: string
+                    type: object
+                  role:
+                    example: EMPLOYEE
+                    type: string
+                type: object
+          description: Details of the currently authenticated user
+      summary: Retrieve details of the currently authenticated user
+      tags:
+        - Users
+  /users/org-hierarchy:
+    get:
+      description:
+        'Fetch the entire organization hierarchy, including all users,
+        their managers, colleagues (users sharing the same manager), and direct reports.
+
+        '
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  properties:
+                    colleagues:
+                      items:
+                        properties:
+                          email:
+                            type: string
+                          firstName:
+                            type: string
+                          id:
+                            type: integer
+                          lastName:
+                            type: string
+                          role:
+                            type: string
+                        type: object
+                      type: array
+                    directReports:
+                      items:
+                        properties:
+                          email:
+                            type: string
+                          firstName:
+                            type: string
+                          id:
+                            type: integer
+                          lastName:
+                            type: string
+                          role:
+                            type: string
+                        type: object
+                      type: array
+                    email:
+                      type: string
+                    firstName:
+                      type: string
+                    id:
+                      type: integer
+                    lastName:
+                      type: string
+                    manager:
+                      nullable: true
+                      properties:
+                        email:
+                          type: string
+                        firstName:
+                          type: string
+                        id:
+                          type: integer
+                        lastName:
+                          type: string
+                        role:
+                          type: string
+                      type: object
+                    role:
+                      type: string
+                  type: object
+                type: array
+          description: Successful response
+        '500':
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    example: Internal server error
+                    type: string
+                type: object
+          description: Internal server error
+      summary: Retrieve the entire organization hierarchy
+      tags:
+        - Users
+  /users/{id}:
+    delete:
+      description:
+        'Soft deletes a user by setting `deletedAt`. Admin-only access.
+
+        '
+      parameters:
+        - description: The ID of the user
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  deletedAt:
+                    format: date-time
+                    nullable: true
+                    type: string
+                  email:
+                    format: email
+                    type: string
+                  firstName:
+                    type: string
+                  id:
+                    type: integer
+                  lastName:
+                    type: string
+                  locationId:
+                    type: integer
+                  reportsToId:
+                    nullable: true
+                    type: integer
+                  role:
+                    type: string
+                  workSettingId:
+                    nullable: true
+                    type: integer
+                type: object
+          description: User soft deleted successfully
+        '400':
+          description: Invalid user ID
+        '500':
+          description: Server error
+      summary: Soft delete a user
+      tags:
+        - Users
+    get:
+      parameters:
+        - description: The ID of the user
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  email:
+                    example: john.doe@example.com
+                    type: string
+                  firstName:
+                    example: John
+                    type: string
+                  id:
+                    example: 1
+                    type: integer
+                  lastName:
+                    example: Doe
+                    type: string
+                  profile:
+                    properties:
+                      additionalInfo:
+                        example: Additional information about the user
+                        type: string
+                      profileImage:
+                        example: https://example.com/image.jpg
+                        type: string
+                      title:
+                        example: Software Engineer
+                        type: string
+                    type: object
+                  role:
+                    example: EMPLOYEE
+                    type: string
+                type: object
+          description: Details of a specific user
+      summary: Retrieve a specific user's details by ID
+      tags:
+        - Users
+    put:
+      description: 'Updates a user by ID. Admin-only access.
+
+        '
+      parameters:
+        - description: The ID of the user
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                email:
+                  format: email
+                  type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                locationId:
+                  type: integer
+                reportsToId:
+                  nullable: true
+                  type: integer
+                role:
+                  type: string
+                workSettingId:
+                  nullable: true
+                  type: integer
+              type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  deletedAt:
+                    format: date-time
+                    nullable: true
+                    type: string
+                  email:
+                    format: email
+                    type: string
+                  firstName:
+                    type: string
+                  id:
+                    type: integer
+                  lastName:
+                    type: string
+                  locationId:
+                    type: integer
+                  reportsToId:
+                    nullable: true
+                    type: integer
+                  role:
+                    type: string
+                  workSettingId:
+                    nullable: true
+                    type: integer
+                type: object
+          description: User updated successfully
+        '400':
+          description: Invalid user ID
+        '500':
+          description: Server error
+      summary: Update an existing user
+      tags:
+        - Users
+  /users/{id}/teams:
+    get:
+      parameters:
+        - description: The ID of the user
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - description: The page number (0-indexed)
+          in: query
+          name: page
+          required: false
+          schema:
+            example: 0
+            type: integer
+        - description: The number of teams per page
+          in: query
+          name: limit
+          required: false
+          schema:
+            example: 10
+            type: integer
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    items:
+                      properties:
+                        description:
+                          example: Handles all engineering tasks
+                          type: string
+                        id:
+                          example: 1
+                          type: integer
+                        name:
+                          example: Engineering Team
+                          type: string
+                      type: object
+                    type: array
+                  next:
+                    example: true
+                    type: boolean
+                type: object
+          description: A paginated list of teams associated with a user
+      summary: Retrieve a paginated list of teams associated with a specific user
+      tags:
+        - Users
+
+security:
+  - cookieAuth: []
+servers:
+  - description: Development server
+    url: http://localhost:5000/api/v1

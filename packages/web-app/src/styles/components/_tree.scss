@@ -1,0 +1,111 @@
+// Variables for Tree Styling
+$line-height: 20px;
+$line-width: 1px;
+$line-color: black;
+$line-border-radius: 5px;
+$line-style: solid;
+$node-padding: 5px;
+
+// Root Tree Styles
+.tree {
+  padding-inline-start: 0;
+  margin: 0;
+  display: flex;
+
+  --tree-line-height: #{$line-height};
+  --tree-line-width: #{$line-width};
+  --tree-line-color: #{$line-color};
+  --tree-line-border-radius: #{$line-border-radius};
+  --tree-node-line-style: #{$line-style};
+  --tree-node-padding: #{$node-padding};
+
+  // Child TreeNode Container
+  .tree-node {
+    flex: auto;
+    text-align: center;
+    list-style-type: none;
+    position: relative;
+    padding: var(--tree-line-height) var(--tree-node-padding) 0
+      var(--tree-node-padding);
+
+    // Horizontal Lines
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      height: var(--tree-line-height);
+      box-sizing: border-box;
+      border-top: var(--tree-line-width) var(--tree-node-line-style)
+        var(--tree-line-color);
+    }
+
+    // Left Line
+    &::before {
+      right: 50%;
+      width: 50%;
+    }
+
+    // Right Line
+    &::after {
+      left: 50%;
+      width: 50%;
+      border-left: var(--tree-line-width) var(--tree-node-line-style)
+        var(--tree-line-color);
+    }
+
+    // Only Child Node
+    &:only-of-type {
+      padding: 0;
+
+      &::after,
+      &::before {
+        display: none;
+      }
+    }
+
+    // First Child Node
+    &:first-of-type {
+      &::before {
+        border: none;
+      }
+      &::after {
+        border-radius: var(--tree-line-border-radius) 0 0 0;
+      }
+    }
+
+    // Last Child Node
+    &:last-of-type {
+      &::before {
+        border-right: var(--tree-line-width) var(--tree-node-line-style)
+          var(--tree-line-color);
+        border-radius: 0 var(--tree-line-border-radius) 0 0;
+      }
+      &::after {
+        border: none;
+      }
+    }
+
+    // Children Container
+    .tree-children {
+      display: flex;
+      padding-inline-start: 0;
+      margin: 0;
+      padding-top: var(--tree-line-height);
+      position: relative;
+
+      // Vertical Line
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: calc(50% - var(--tree-line-width) / 2);
+        height: var(--tree-line-height);
+        width: 0;
+        border-left: var(--tree-line-width) var(--tree-node-line-style)
+          var(--tree-line-color);
+        box-sizing: border-box;
+      }
+    }
+  }
+}

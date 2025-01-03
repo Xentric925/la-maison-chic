@@ -1,0 +1,221 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["private", "public"]
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+  SUPPLIER
+
+  @@schema("public")
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+
+  @@schema("public")
+}
+
+model User {
+  id         String    @id @default(uuid())
+  username   String    @unique
+  email      String    @unique
+  role       UserRole  @default(CUSTOMER)
+  profileId  String?
+  locationId String? // optional for registered users
+  location   Location? @relation(fields: [locationId], references: [id])
+  receipts   Receipt[]
+  profile    Profile?
+
+  @@index([email])
+  @@schema("public")
+}
+
+model Profile {
+  id             String     @id @default(uuid())
+  userId         String     @unique
+  bio            String?
+  phoneNumber    String?    @unique
+  addressDetails Json?
+  user           User       @relation(fields: [userId], references: [id])
+  Supplier       Supplier[]
+
+  @@index([userId])
+  @@schema("public")
+}
+
+model GuestCustomer {
+  id          String    @id @default(uuid())
+  name        String
+  phoneNumber String    @unique
+  locationId  String
+  location    Location  @relation(fields: [locationId], references: [id])
+  receipts    Receipt[]
+
+  @@index([phoneNumber])
+  @@schema("public")
+}
+
+model Location {
+  id             String          @id @default(uuid())
+  name           String
+  country        String
+  city           String
+  address        String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  deletedAt      DateTime?
+  users          User[]
+  guestCustomers GuestCustomer[]
+
+  @@index([deletedAt])
+  @@schema("public")
+}
+
+model Product {
+  id             String           @id @default(uuid())
+  carpetNumber   Int?
+  title          String
+  description    String
+  category       String
+  length         Float?
+  width          Float?
+  height         Float?
+  price          Float
+  capital        Float
+  qty            Int
+  isSold         Boolean          @default(false)
+  suppId         String
+  supplier       Supplier         @relation(fields: [suppId], references: [id])
+  images         Image[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  ReceiptProduct ReceiptProduct[]
+  InvoiceProduct InvoiceProduct[]
+
+  @@index([title, category])
+  @@index([price])
+  @@schema("public")
+}
+
+model Supplier {
+  id          String    @id @default(uuid())
+  address     String
+  totalSales  Float
+  isSalesman  Boolean   @default(false)
+  userId      String?
+  userProfile Profile?  @relation(fields: [userId], references: [id])
+  products    Product[]
+  payments    Payment[]
+  Invoice     Invoice[]
+
+  @@index([userId])
+  @@schema("public")
+}
+
+model Receipt {
+  id              String           @id @default(uuid())
+  total           Float
+  totalPaid       Float
+  date            DateTime
+  customerId      String? // Nullable to support guest sales
+  guestCustomerId String? // Nullable for registered user sales
+  status          PaymentStatus    @default(PENDING)
+  customer        User?            @relation(fields: [customerId], references: [id])
+  guestCustomer   GuestCustomer?   @relation(fields: [guestCustomerId], references: [id])
+  products        ReceiptProduct[]
+  // Application-level validation: Ensure only one of customerId or guestCustomerId is set
+
+  @@index([date])
+  @@schema("public")
+}
+
+model ReceiptProduct {
+  id           String   @id @default(uuid())
+  receiptId    String
+  receipt      Receipt  @relation(fields: [receiptId], references: [id])
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id])
+  productPrice Float
+  date         DateTime
+
+  @@index([productId])
+  @@index([receiptId])
+  @@schema("public")
+}
+
+model Image {
+  id        String  @id @default(uuid())
+  url       String
+  alt       String?
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@schema("public")
+}
+
+model Payment {
+  id         String        @id @default(uuid())
+  supplierId String
+  supplier   Supplier      @relation(fields: [supplierId], references: [id])
+  amount     Float
+  invoiceId  String?
+  status     PaymentStatus @default(PENDING)
+  date       DateTime      @default(now())
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  @@index([status])
+  @@index([supplierId])
+  @@index([invoiceId])
+  @@schema("private")
+}
+
+model Invoice {
+  id          String           @id @default(uuid())
+  supplierId  String
+  supplier    Supplier         @relation(fields: [supplierId], references: [id])
+  total       Float
+  totalPaid   Float
+  date        DateTime
+  products    InvoiceProduct[]
+  Installment Installment[]
+
+  @@schema("private")
+}
+
+model InvoiceProduct {
+  id           String   @id @default(uuid())
+  invoiceId    String
+  invoice      Invoice  @relation(fields: [invoiceId], references: [id])
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id])
+  productPrice Float
+  date         DateTime
+
+  @@index([productId])
+  @@index([invoiceId])
+  @@schema("private")
+}
+
+model Installment {
+  id              String   @id @default(uuid())
+  period          Int
+  amountPerPeriod Float
+  timesPaid       Int
+  date            DateTime
+  total           Float
+  invoiceId       String
+  invoice         Invoice  @relation(fields: [invoiceId], references: [id])
+
+  @@schema("private")
+}

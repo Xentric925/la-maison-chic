@@ -1,0 +1,21 @@
+{
+  "name": "hr",
+  "version": "1.0.0",
+  "description": "Human Resources Management System",
+  "private": true,
+  "devDependencies": {
+    "husky": "9.1.6"
+  },
+  "scripts": {
+    "start": "sh ./start.sh",
+    "format": "sh ./format.sh",
+    "seed": "sh ./seed.sh",
+    "prepare": "husky",
+    "db-api": "npm run --workspace=db-api",
+    "jobs": "npm run --workspace=jobs",
+    "web-app": "npm run --workspace=web-app"
+  },
+  "workspaces": [
+    "packages/*"
+  ]
+}

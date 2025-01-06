@@ -1,5 +1,3 @@
-'use client';
-
 import * as React from 'react';
 import {
   BookOpen,
@@ -11,7 +9,6 @@ import {
   GitCompare,
   Group,
   HardDrive,
-  Hash,
   LayoutDashboard,
   ListStart,
   ListStartIcon,
@@ -24,23 +21,18 @@ import {
   Settings,
   Settings2,
 } from 'lucide-react';
-import Image from 'next/image';
-import Avatar from '@/assets/icons/avatar.svg';
 import { NavMain } from '@/components/nav-main';
 /* import { NavProjects } from '@/components/nav-projects'; */
 import { NavUser } from '@/components/nav-user';
-import { TeamSwitcher } from '@/components/team-switcher';
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarHeader,
+  /* SidebarHeader, */
   SidebarRail,
 } from '@/components/ui/sidebar';
 import useStore from '@/lib/store';
-import useSWR from 'swr';
-import { fetcher } from '@/lib/utils';
-import { API_URL, urlDictionary } from '@/lib/constants';
+import { urlDictionary } from '@/lib/constants';
 
 export function AppSidebar({
   isLoading,
@@ -49,50 +41,7 @@ export function AppSidebar({
   isLoading: boolean;
   props: React.ComponentProps<typeof Sidebar>;
 }) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [teams, setTeams] = React.useState<any[]>([]);
   const { user, selectedPage } = useStore();
-  const { data: teamData } = useSWR(
-    user ? `${API_URL}/users/${user?.id}/teams` : null,
-    fetcher,
-    /* {
-      dedupingInterval: 60000 * 60, // Cache data for 30 minutes
-      revalidateOnFocus: false, // Disable revalidation on focus
-      revalidateOnReconnect: false, // Disable revalidation on reconnect
-    }, */
-  );
-  React.useEffect(() => {
-    if (teamData) {
-      //console.log('teamData:', teamData);
-      setTeams(() => {
-        return [
-          {
-            id: -1,
-            name: 'Personal',
-            logo: () => (
-              <Image
-                src={user?.profileImage || Avatar.src}
-                alt='Profile Picture'
-                className='rounded-full w-8 h-8'
-                width={8}
-                height={8}
-              />
-            ), // Use a component function here
-            description: 'Your personal workspace',
-          },
-          ...teamData.data.map(
-            (team: { id: string; name: string; description: string }) => ({
-              id: team.id,
-              name: team.name,
-              logo: Hash, // Pass a component reference
-              description: team.description,
-            }),
-          ),
-        ];
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [teamData]);
 
   const data = React.useMemo(() => {
     return {
@@ -236,11 +185,11 @@ export function AppSidebar({
 
   return (
     <Sidebar className='bg-w' collapsible='icon' {...props}>
-      {teams && (
+      {/* {teams && (
         <SidebarHeader>
           <TeamSwitcher teams={teams} />
         </SidebarHeader>
-      )}
+      )} */}
       <SidebarContent>
         <NavMain items={data.navMain} isLoading={isLoading} />
         {/* <NavProjects projects={data.projects} /> */}

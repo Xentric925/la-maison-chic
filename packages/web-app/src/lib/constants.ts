@@ -8,6 +8,11 @@ type UrlDictionary = {
 };
 
 export const urlDictionary: UrlDictionary = {
+  '/products': {
+    title: 'Products',
+    parentTitle: 'Dashboard',
+    parentUrl: '/',
+  },
   '/admin': {
     title: 'Admin',
     parentTitle: 'Admin Dashboard',

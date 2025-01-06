@@ -74,12 +74,15 @@ const ManageGroup = ({ params: { id } }: { params: { id: string } }) => {
   type GroupMember = {
     userId: number;
     user: {
-      firstName: string;
-      lastName: string;
+      username: string;
       email: string;
       profile?: {
         profilePicture?: string;
         title?: string;
+      };
+      details: {
+        firstName: string;
+        lastName: string;
       };
     };
   };
@@ -313,8 +316,8 @@ const ManageGroup = ({ params: { id } }: { params: { id: string } }) => {
                   />
                   <UserCard
                     id={member.userId}
-                    firstName={member.user.firstName}
-                    lastName={member.user.lastName}
+                    firstName={member.user.details.firstName}
+                    lastName={member.user.details.lastName}
                     email={member.user.email}
                     profile={{
                       title: member.user.profile?.title || '',
@@ -340,9 +343,11 @@ const ManageGroup = ({ params: { id } }: { params: { id: string } }) => {
                         users?.data.map(
                           (user: {
                             id: number;
-                            firstName: string;
-                            lastName: string;
                             email: string;
+                            details: {
+                              firstName: string;
+                              lastName: string;
+                            };
                           }) => (
                             <div
                               key={user.id}
@@ -350,11 +355,12 @@ const ManageGroup = ({ params: { id } }: { params: { id: string } }) => {
                               onClick={() =>
                                 setNewMember({
                                   id: user.id,
-                                  name: user.firstName,
+                                  name: user.details.firstName,
                                 })
                               }
                             >
-                              {user.firstName} {user.lastName} ({user.email})
+                              {user.details.firstName} {user.details.lastName} (
+                              {user.email})
                             </div>
                           ),
                         )

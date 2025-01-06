@@ -35,53 +35,50 @@ const Page = ({ params }: PageProps) => {
   } = useSWR(`${API_URL}/validate-token`, () =>
     validateTokenResponse(params.id),
   );
-
+  const { data: user, error: meError } = useSWR(
+    data && !isValidating ? `${API_URL}/users/me` : null,
+    fetcher,
+    {
+      dedupingInterval: 60000 * 10,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    },
+  );
   useEffect(() => {
-    if (!isValidating && !swrError && data?.status === 200) {
+    if (user) {
       setCookie('loggedIn', '1');
       setIsLoggedIn(true);
-
-      (async () => {
-        const {
-          data: id,
-          firstName,
-          lastName,
-          email,
-          role,
-          profile,
-        } = await fetcher(`${API_URL}/users/me`);
-
-        setUser({
-          id,
-          firstName,
-          lastName,
-          email,
-          role,
-          profileImage: profile?.profileImage || null,
-          title: profile?.title || null,
-        });
-
-        setTimeout(() => router.push('/'), 2000);
-      })();
-    } else if (!isValidating && (swrError || data?.status !== 200)) {
-      setError('An unexpected error occurred.');
-      toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: 'There was a problem with your request.',
-        action: (
-          <ToastAction
-            altText='Try again'
-            onClick={() => router.push('/login')}
-          >
-            Try again
-          </ToastAction>
-        ),
+      setUser({
+        id: user.id,
+        firstName: user.details.firstName,
+        lastName: user.details.lastName,
+        email: user.email,
+        role: user.role,
+        profileImage: user.profile?.profileImage || null,
+        title: user.profile?.title || null,
       });
-      setTimeout(() => router.push('/login'), 1000);
+      setTimeout(() => router.push('/'), 2000);
+    } else {
+      if (swrError || meError) {
+        setError('An unexpected error occurred.');
+        toast({
+          variant: 'destructive',
+          title: 'Uh oh! Something went wrong.',
+          description: 'There was a problem with your request.',
+          action: (
+            <ToastAction
+              altText='Try again'
+              onClick={() => router.push('/login')}
+            >
+              Try again
+            </ToastAction>
+          ),
+        });
+        setTimeout(() => router.push('/login'), 1000);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isValidating, data, swrError]);
+  }, [user, meError, swrError]);
 
   const getStatusStyles = () => {
     if (isValidating) return 'border-blue-500 text-blue-500';

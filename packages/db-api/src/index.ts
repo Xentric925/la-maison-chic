@@ -6,7 +6,12 @@ import cors from 'cors';
 
 import { writePrisma, readPrisma, adminPrisma } from './prisma';
 
-import helloRouter from './routes/helloRoutes';
+import userAuthRouter from './routes/userAuthRoutes';
+import userRouter from './routes/userRoutes';
+import productRouter from './routes/productRoutes';
+import purchaseRouter from './routes/purchaseRoutes';
+import supplierRouter from './routes/supplierRoutes';
+import salesRouter from './routes/salesRoutes';
 
 if (!process.env.DB_API_PORT) {
   process.env.DB_API_PORT = '5000';
@@ -16,9 +21,8 @@ export const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-// TODO: Replace origin with environment variable
 const corsOptions = {
-  origin: `http://localhost:3000`,
+  origin: process.env.ORIGIN!,
   credentials: true,
 };
 app.use(cors(corsOptions));
@@ -34,7 +38,14 @@ requiredEnvVars.forEach((envVar) => {
 const swaggerDocument = YAML.load('./openapi.yaml');
 app.use(`/api/v1/docs`, swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-const routers = [helloRouter];
+const routers = [
+  userAuthRouter,
+  userRouter,
+  productRouter,
+  purchaseRouter,
+  supplierRouter,
+  salesRouter,
+];
 
 routers.forEach((router) => {
   app.use(`/api/v1`, router);

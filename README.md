@@ -1,5 +1,4 @@
-# eternals-hr
-# hr
+# la-maison-chic
 
 In the root directory:
 

@@ -12,12 +12,15 @@ import UserCard from '@/components/shared/UserCard';
 type GroupMember = {
   userId: number;
   user: {
-    firstName: string;
-    lastName: string;
+    username: string;
     email: string;
     profile?: {
       profilePicture?: string;
       title?: string;
+    };
+    details: {
+      firstName: string;
+      lastName: string;
     };
   };
 };
@@ -99,8 +102,8 @@ const GroupDetailsPage = ({ params: { id } }: { params: { id: string } }) => {
               >
                 <UserCard
                   id={member.userId}
-                  firstName={member.user.firstName}
-                  lastName={member.user.lastName}
+                  firstName={member.user.details.firstName}
+                  lastName={member.user.details.lastName}
                   email={member.user.email}
                   profile={{
                     title: member.user.profile?.title || '',

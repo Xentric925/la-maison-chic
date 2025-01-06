@@ -41,7 +41,7 @@ export function NavMain({
   const { selectedPage, setSelectedPage } = useStore();
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Eternals HR</SidebarGroupLabel>
+      <SidebarGroupLabel>La Maison Chic</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) =>
           !isLoading ? (

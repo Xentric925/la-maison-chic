@@ -10,14 +10,19 @@ import { GENERIC_ERROR_MESSAGE, getErrorMessage } from '@/lib/utils';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    setMessage('');
+    setError(null);
     try {
-      const response = await axios.post(`${API_URL}/login`, { email });
+      const response = await axios.post(`${API_URL}/login`, {
+        email,
+        password,
+      });
 
       if (response.status === 200) {
         setMessage(response.data.message);
@@ -49,14 +54,13 @@ const LoginPage = () => {
             >
               <path d='M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3' />
             </svg>
-            HR App
+            La Maison Chic
           </div>
           <div className='relative z-20 mt-auto'>
             <blockquote className='space-y-2'>
               <p className='text-lg'>
-                &ldquo;Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                Sed do eiusmod tempor incididunt ut labore et dolore magna
-                aliqua!&rdquo;
+                your first choice for quality antique furniture and home
+                accessories
               </p>
               <footer className='text-sm'>Steve Jobs, CEO</footer>
             </blockquote>
@@ -66,12 +70,12 @@ const LoginPage = () => {
           <div className='mx-auto flex w-full flex-col justify-center space-y-6 w-[350px]'>
             <div className='flex flex-col space-y-2 text-center'>
               <h1 className='text-2xl font-semibold tracking-tight'>Sign In</h1>
-              <p className='text-sm text-muted-foreground'>
-                Enter your email below to sign in
-              </p>
             </div>
             <form onSubmit={handleLogin} className='flex flex-col space-y-4'>
               <div className='flex flex-col'>
+                <label htmlFor='email' className='text-sm'>
+                  Email
+                </label>
                 <Input
                   id='email'
                   type='email'
@@ -80,8 +84,19 @@ const LoginPage = () => {
                   className='p-2 rounded-md'
                   required
                 />
+                <label htmlFor='password' className='text-sm'>
+                  Password
+                </label>
+                <Input
+                  id='password'
+                  type='password'
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className='p-2 rounded-md'
+                  required
+                />
               </div>
-              <Button type='submit' disabled={!email}>
+              <Button type='submit' disabled={!email || !password}>
                 Submit
               </Button>
             </form>

@@ -52,13 +52,13 @@ const SidebarNavigation = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
   const { setIsLoggedIn } = useAuth();
   const { selectedPage, setSelectedPage } = useStore();
-
+  console.log(selectedPage);
   useEffect(() => {
     if (me && user?.id !== me.id) {
       setUser({
         id: me.id,
-        firstName: me.firstName,
-        lastName: me.lastName,
+        firstName: me.details.firstName,
+        lastName: me.details.lastName,
         email: me.email,
         role: me.role,
         profileImage: me.profile?.profileImage || null,
@@ -103,7 +103,7 @@ const SidebarNavigation = ({ children }: { children: ReactNode }) => {
   }, [pathname, selectedPage, setSelectedPage]);
 
   if (isLoggedIn && error) {
-    if (error.status === 401) {
+    if (error.status === 401 || error.status === 403) {
       clearCookie('email');
       clearCookie('loggedIn');
       setIsLoggedIn(false);

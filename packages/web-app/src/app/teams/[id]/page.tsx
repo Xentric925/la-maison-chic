@@ -12,8 +12,10 @@ import UserCard from '@/components/shared/UserCard';
 type TeamMember = {
   userId: number;
   user: {
-    firstName: string;
-    lastName: string;
+    details: {
+      firstName: string;
+      lastName: string;
+    };
     email: string;
     profile?: {
       profilePicture?: string;
@@ -96,8 +98,8 @@ const TeamDetailsPage = ({ params: { id } }: { params: { id: string } }) => {
               >
                 <UserCard
                   id={member.userId}
-                  firstName={member.user.firstName}
-                  lastName={member.user.lastName}
+                  firstName={member.user.details.firstName}
+                  lastName={member.user.details.lastName}
                   email={member.user.email}
                   profile={{
                     title: member.user.profile?.title || '',

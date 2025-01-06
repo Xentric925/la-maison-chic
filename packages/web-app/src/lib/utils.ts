@@ -11,10 +11,33 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const fetcher = async (url: string) => {
-  const response = await axios.get(url, {
-    withCredentials: true,
-  });
-  return response.data;
+  try {
+    const response = await axios.get(url, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      try {
+        const refreshResponse = await axios.post(
+          `${API_URL}/refresh-token`,
+          {},
+          {
+            withCredentials: true,
+          },
+        );
+        if (refreshResponse.status === 200) {
+          const retryResponse = await axios.get(url, {
+            withCredentials: true,
+          });
+          return retryResponse.data;
+        }
+      } catch (refreshError) {
+        throw refreshError;
+      }
+    }
+    throw error;
+  }
 };
 
 export const getErrorMessage = (error: unknown) => {

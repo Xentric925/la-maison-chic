@@ -6,216 +6,310 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  schemas  = ["private", "public"]
+  schemas  = ["private", "public", "jobs"]
+}
+
+model Details {
+  id        String    @id @default(uuid())
+  firstName String
+  lastName  String
+  phone     String?
+  address   String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  user     User?
+  customer Customer?
+  supplier Supplier?
+
+  @@index([firstName, lastName])
+  @@index([phone])
+  @@schema("public")
+}
+
+model UserAuth {
+  id           String    @id @default(uuid())
+  userId       String    @unique
+  loginToken   String?
+  refreshToken String?
+  sessionId    String?
+  expiresAt    DateTime? // login token expiration date
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([loginToken])
+  @@index([refreshToken])
+  @@index([sessionId])
+  @@schema("private")
 }
 
 enum UserRole {
-  CUSTOMER
   ADMIN
-  SUPPLIER
+  USER
 
   @@schema("public")
 }
 
-enum PaymentStatus {
+model Job {
+  id           String    @id @default(uuid())
+  type         JobType
+  status       JobStatus
+  priority     Int       @default(0)
+  payload      Json
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  completedAt  DateTime?
+  errorMessage String?
+  failureCount Int       @default(0)
+
+  @@schema("jobs")
+}
+
+enum JobStatus {
   PENDING
+  RUNNING
   COMPLETED
   FAILED
+  CANCELED
+  RETRY
 
-  @@schema("public")
+  @@schema("jobs")
+}
+
+enum JobType {
+  EMAIL
+  SMS
+  PUSH_NOTIFICATION
+  SLACK
+
+  @@schema("jobs")
 }
 
 model User {
-  id         String    @id @default(uuid())
-  username   String    @unique
-  email      String    @unique
-  role       UserRole  @default(CUSTOMER)
-  profileId  String?
-  locationId String? // optional for registered users
-  location   Location? @relation(fields: [locationId], references: [id])
-  receipts   Receipt[]
-  profile    Profile?
+  id        String    @id @default(uuid())
+  details   Details   @relation(fields: [detailsId], references: [id])
+  detailsId String    @unique
+  username  String    @unique
+  email     String    @unique
+  password  String
+  role      UserRole
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  UserAuth  UserAuth?
 
+  @@index([username])
   @@index([email])
   @@schema("public")
 }
 
-model Profile {
-  id             String     @id @default(uuid())
-  userId         String     @unique
-  bio            String?
-  phoneNumber    String?    @unique
-  addressDetails Json?
-  user           User       @relation(fields: [userId], references: [id])
-  Supplier       Supplier[]
+model Customer {
+  id        String    @id @default(uuid())
+  details   Details   @relation(fields: [detailsId], references: [id])
+  detailsId String    @unique
+  purchases Sale[]
+  payments  Payment[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
-  @@index([userId])
-  @@schema("public")
-}
-
-model GuestCustomer {
-  id          String    @id @default(uuid())
-  name        String
-  phoneNumber String    @unique
-  locationId  String
-  location    Location  @relation(fields: [locationId], references: [id])
-  receipts    Receipt[]
-
-  @@index([phoneNumber])
-  @@schema("public")
-}
-
-model Location {
-  id             String          @id @default(uuid())
-  name           String
-  country        String
-  city           String
-  address        String
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  deletedAt      DateTime?
-  users          User[]
-  guestCustomers GuestCustomer[]
-
-  @@index([deletedAt])
-  @@schema("public")
-}
-
-model Product {
-  id             String           @id @default(uuid())
-  carpetNumber   Int?
-  title          String
-  description    String
-  category       String
-  length         Float?
-  width          Float?
-  height         Float?
-  price          Float
-  capital        Float
-  qty            Int
-  isSold         Boolean          @default(false)
-  suppId         String
-  supplier       Supplier         @relation(fields: [suppId], references: [id])
-  images         Image[]
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  ReceiptProduct ReceiptProduct[]
-  InvoiceProduct InvoiceProduct[]
-
-  @@index([title, category])
-  @@index([price])
+  @@index([detailsId])
   @@schema("public")
 }
 
 model Supplier {
-  id          String    @id @default(uuid())
-  address     String
-  totalSales  Float
-  isSalesman  Boolean   @default(false)
-  userId      String?
-  userProfile Profile?  @relation(fields: [userId], references: [id])
-  products    Product[]
-  payments    Payment[]
-  Invoice     Invoice[]
+  id        String     @id @default(uuid())
+  details   Details    @relation(fields: [detailsId], references: [id])
+  detailsId String     @unique
+  products  Product[]
+  carpets   Carpet[]
+  purchases Purchase[]
+  payments  Payment[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?
 
-  @@index([userId])
+  @@index([detailsId])
   @@schema("public")
 }
 
-model Receipt {
-  id              String           @id @default(uuid())
-  total           Float
-  totalPaid       Float
-  date            DateTime
-  customerId      String? // Nullable to support guest sales
-  guestCustomerId String? // Nullable for registered user sales
-  status          PaymentStatus    @default(PENDING)
-  customer        User?            @relation(fields: [customerId], references: [id])
-  guestCustomer   GuestCustomer?   @relation(fields: [guestCustomerId], references: [id])
-  products        ReceiptProduct[]
-  // Application-level validation: Ensure only one of customerId or guestCustomerId is set
+model Product {
+  id            String            @id @default(uuid())
+  name          String
+  description   String?
+  price         Float
+  quantity      Int               @default(1)
+  supplier      Supplier?         @relation(fields: [supplierId], references: [id])
+  supplierId    String?
+  isOwnedByShop Boolean           @default(true)
+  purchaseCost  Float?
+  images        ProductImage[]
+  carpets       Carpet[]
+  dimensions    ProductDimension?
+  salesDetails  SalesDetail[]
+  purchases     PurchaseDetail[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  deletedAt     DateTime?
 
-  @@index([date])
+  @@index([name])
+  @@index([price])
+  @@index([quantity])
+  @@index([supplierId])
+  @@index([isOwnedByShop])
   @@schema("public")
 }
 
-model ReceiptProduct {
-  id           String   @id @default(uuid())
-  receiptId    String
-  receipt      Receipt  @relation(fields: [receiptId], references: [id])
-  productId    String
-  product      Product  @relation(fields: [productId], references: [id])
-  productPrice Float
-  date         DateTime
+model ProductImage {
+  id        String    @id @default(uuid())
+  url       String
+  product   Product   @relation(fields: [productId], references: [id])
+  productId String
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
 
   @@index([productId])
-  @@index([receiptId])
   @@schema("public")
 }
 
-model Image {
-  id        String  @id @default(uuid())
-  url       String
-  alt       String?
-  productId String
-  product   Product @relation(fields: [productId], references: [id])
+model ProductDimension {
+  id        String    @id @default(uuid())
+  product   Product   @relation(fields: [productId], references: [id])
+  productId String    @unique
+  width     Float?
+  length    Float?
+  height    Float?
+  diameter  Float?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
+  @@index([productId])
   @@schema("public")
+}
+
+model Carpet {
+  id         String    @id @default(uuid())
+  code       String
+  supplierId String?
+  supplier   Supplier? @relation(fields: [supplierId], references: [id])
+  product    Product   @relation(fields: [productId], references: [id])
+  productId  String
+  deletedAt  DateTime?
+
+  @@unique([code, supplierId])
+  @@index([code])
+  @@index([supplierId])
+  @@index([productId])
+  @@schema("public")
+}
+
+model Sale {
+  id           String        @id @default(uuid())
+  customer     Customer      @relation(fields: [customerId], references: [id])
+  customerId   String
+  salesDetails SalesDetail[]
+  totalCost    Float
+  paidAmount   Float         @default(0)
+  status       SaleStatus    @default(PENDING)
+  payments     Payment[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+
+  @@index([customerId])
+  @@index([status])
+  @@schema("private")
+}
+
+model SalesDetail {
+  id        String    @id @default(uuid())
+  sale      Sale      @relation(fields: [saleId], references: [id])
+  saleId    String
+  product   Product   @relation(fields: [productId], references: [id])
+  productId String
+  quantity  Int       @default(1)
+  soldPrice Float
+  deletedAt DateTime?
+
+  @@index([saleId])
+  @@index([productId])
+  @@schema("private")
+}
+
+model Purchase {
+  id              String           @id @default(uuid())
+  supplier        Supplier         @relation(fields: [supplierId], references: [id])
+  supplierId      String
+  purchaseDetails PurchaseDetail[]
+  totalCost       Float
+  paidAmount      Float            @default(0)
+  dueDate         DateTime?
+  status          PurchaseStatus   @default(PENDING)
+  payments        Payment[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  deletedAt       DateTime?
+
+  @@index([supplierId])
+  @@index([status])
+  @@index([dueDate])
+  @@schema("private")
+}
+
+model PurchaseDetail {
+  id         String    @id @default(uuid())
+  purchase   Purchase  @relation(fields: [purchaseId], references: [id])
+  purchaseId String
+  product    Product   @relation(fields: [productId], references: [id])
+  productId  String
+  quantity   Int       @default(1)
+  costPrice  Float
+  deletedAt  DateTime?
+
+  @@index([purchaseId])
+  @@index([productId])
+  @@schema("private")
 }
 
 model Payment {
-  id         String        @id @default(uuid())
-  supplierId String
-  supplier   Supplier      @relation(fields: [supplierId], references: [id])
+  id         String    @id @default(uuid())
   amount     Float
-  invoiceId  String?
-  status     PaymentStatus @default(PENDING)
-  date       DateTime      @default(now())
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
+  date       DateTime  @default(now())
+  sale       Sale?     @relation(fields: [saleId], references: [id])
+  saleId     String?
+  purchase   Purchase? @relation(fields: [purchaseId], references: [id])
+  purchaseId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+  customerId String?
+  supplier   Supplier? @relation(fields: [supplierId], references: [id])
+  supplierId String?
+  createdAt  DateTime  @default(now())
+  deletedAt  DateTime?
 
-  @@index([status])
+  @@index([saleId])
+  @@index([purchaseId])
+  @@index([customerId])
   @@index([supplierId])
-  @@index([invoiceId])
+  @@index([date])
   @@schema("private")
 }
 
-model Invoice {
-  id          String           @id @default(uuid())
-  supplierId  String
-  supplier    Supplier         @relation(fields: [supplierId], references: [id])
-  total       Float
-  totalPaid   Float
-  date        DateTime
-  products    InvoiceProduct[]
-  Installment Installment[]
+enum SaleStatus {
+  PENDING
+  COMPLETED
+  PARTIAL_PAYMENT
 
   @@schema("private")
 }
 
-model InvoiceProduct {
-  id           String   @id @default(uuid())
-  invoiceId    String
-  invoice      Invoice  @relation(fields: [invoiceId], references: [id])
-  productId    String
-  product      Product  @relation(fields: [productId], references: [id])
-  productPrice Float
-  date         DateTime
-
-  @@index([productId])
-  @@index([invoiceId])
-  @@schema("private")
-}
-
-model Installment {
-  id              String   @id @default(uuid())
-  period          Int
-  amountPerPeriod Float
-  timesPaid       Int
-  date            DateTime
-  total           Float
-  invoiceId       String
-  invoice         Invoice  @relation(fields: [invoiceId], references: [id])
+enum PurchaseStatus {
+  PENDING
+  COMPLETED
+  PARTIAL_PAYMENT
 
   @@schema("private")
 }
